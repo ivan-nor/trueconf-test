@@ -1,6 +1,6 @@
 <template>
   <div class="elevator-shaft">
-    <div class="elevator" :style="elevatorStyle">{{ id }}</div>
+    <div class="elevator" :style="elevatorStyle">{{ d }}</div>
   </div>
 </template>
 
@@ -9,7 +9,8 @@ export default {
   props: {
     currentFloor: Number,
     numberOfFloors: Number,
-    id: Number
+    id: Number,
+    d: Number
   },
   data () {
     return {
@@ -27,21 +28,21 @@ export default {
     console.log('elev upd')
   },
   methods: {
-    moveElevator (newFloor, oldFloor) {
-      console.log('move elevator')
-      const floorHeight = 100
+    // moveElevator (newFloor, oldFloor) {
+    //   console.log('move elevator')
+    //   const floorHeight = 100
 
-      const positionChange = (oldFloor - newFloor) * floorHeight
+    //   const positionChange = (oldFloor - newFloor) * floorHeight
 
-      const elevatorElement = this.$el.querySelector('.elevator')
-      elevatorElement.style.transition = 'bottom 0.5s ease'
-      elevatorElement.style.bottom = `${positionChange}px`
+    //   const elevatorElement = this.$ref.querySelector('.elevator')
+    //   elevatorElement.style.transition = 'bottom 1s ease'
+    //   elevatorElement.style.bottom = `${positionChange}px`
 
-      setTimeout(() => {
-        elevatorElement.style.transition = 'none'
-        elevatorElement.style.bottom = '0px'
-      }, 500)
-    }
+    //   setTimeout(() => {
+    //     elevatorElement.style.transition = 'none'
+    //     elevatorElement.style.bottom = '0px'
+    //   }, 500)
+    // }
   }
 }
 </script>
