@@ -27,21 +27,21 @@ export default {
     console.log('elev upd')
   },
   methods: {
-    // moveElevator (newFloor, oldFloor) {
-    //   console.log('move elevator')
-    //   const floorHeight = 100
+    moveElevator (newFloor, oldFloor) {
+      console.log('move elevator')
+      const floorHeight = 100
 
-    //   const positionChange = (oldFloor - newFloor) * floorHeight
+      const positionChange = (oldFloor - newFloor) * floorHeight
 
-    //   const elevatorElement = this.$el.querySelector('.elevator')
-    //   elevatorElement.style.transition = 'bottom 0.5s ease'
-    //   elevatorElement.style.bottom = `${positionChange}px`
+      const elevatorElement = this.$el.querySelector('.elevator')
+      elevatorElement.style.transition = 'bottom 0.5s ease'
+      elevatorElement.style.bottom = `${positionChange}px`
 
-    //   setTimeout(() => {
-    //     elevatorElement.style.transition = 'none'
-    //     elevatorElement.style.bottom = '0px'
-    //   }, 500)
-    // }
+      setTimeout(() => {
+        elevatorElement.style.transition = 'none'
+        elevatorElement.style.bottom = '0px'
+      }, 500)
+    }
   }
 }
 </script>
