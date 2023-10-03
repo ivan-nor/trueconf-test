@@ -1,26 +1,21 @@
 <template>
   <div class="app">
-    <input type="number" min="1" max="5" v-model="numberOfElevators" @change="changeElevators"/>
+    <input type="number" min="1" max="5" v-model="numberOfElevators"/>
     <p>Число лифтов: {{ numberOfElevators }}</p>
-    <input type="number" min="1" max="5" v-model="numberOfFloors" @change="changeFloors"/>
+    <input type="number" min="1" max="5" v-model="numberOfFloors" />
     <p>Число этажей: {{ numberOfFloors }}</p>
     <div class="shaft">
-      <div v-for="index in numberOfElevators" :key="index">
+      <div v-for="elevator in elevators" :key="elevator.id">
         <ElevatorComponent
-          :id="i"
-          :currentFloor="1"
-          :numberOfFloors="numberOfFloors"
-          :d="elevators.findIndex((o) => {
-            console.log(o, elevators, elevators[index])
-            return o.id === index
-          })"
+          :floors="floors"
+          :elevator="elevator"
         />
       </div>
-      <CallButtons
-        :numberOfFloors="numberOfFloors"
-        :elevators="elevators"
-        @callButton="callButton"
-      />
+        <CallButtons
+          :floors="floors"
+          :elevators="elevators"
+          @callButton="callButton"
+        />
     </div>
   </div>
 </template>
@@ -29,8 +24,6 @@
 import ElevatorComponent from './components/ElevatorComponent.vue'
 import CallButtons from './components/CallButtons.vue'
 import _ from 'lodash'
-
-let count = 100
 
 export default {
   name: 'App',
@@ -46,38 +39,51 @@ export default {
       floors: []
     }
   },
-  updated () {
-    console.log('updated APP')
+  watch: {
+    numberOfElevators () {
+      this.setElevators()
+    },
+    numberOfFloors () {
+      this.setFloors()
+    }
   },
-  mounted () {
-    const newElevators = []
-    for (let i = 1; i <= this.$data.numberOfElevators; i += 1) {
-      newElevators.push({ id: count++, currentFloor: 1 })
-      this.$data.elevators = newElevators
-    }
-    const newFloors = []
-    for (let j = 1; j < this.$data.numberOfFloors; j += 1) {
-      newFloors.push({ id: j })
-      // console.log('floors', floors)
-    }
-    this.$data.floors = newFloors
-    console.log('mounted APP', this.$data)
+  updated () {
+    // console.log('updated APP')
+  },
+  created () {
+    this.setElevators()
+    this.setFloors()
+    // console.log('created')
   },
   computed: {
-    getElevator (id) {
-      return _.find(this.elevators, (o) => o.id === id)
-    }
   },
   methods: {
+    getElevator (id) {
+      const elevator = _.find(this.elevators, (o) => o.id === id)
+      console.log('get elevator', id, elevator)
+      return elevator
+    },
+
     callButton (floor) { // отсюда идет задача в стек вызовов лифта
       console.log('Вызван лифт на этаж:', floor)
     },
 
-    changeElevators (event) {
-      console.log('change elevators')
+    setElevators () {
+      console.log('set elevators', this.numberOfElevators)
+      const newElevators = []
+      for (let i = 1; i <= this.numberOfElevators; i += 1) {
+        newElevators.push({ id: i, currentFloor: 1 })
+      }
+      this.elevators = newElevators
     },
-    changeFloors (event) {
-      console.log('change floors')
+
+    setFloors () {
+      console.log('set floors', this.numberOfFloors)
+      const newFloors = []
+      for (let i = 1; i <= this.numberOfFloors; i += 1) {
+        newFloors.push({ id: i })
+      }
+      this.floors = newFloors
     }
   }
 }

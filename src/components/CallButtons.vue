@@ -1,16 +1,11 @@
 <template>
-  <!-- <div class="call-buttons"> -->
-      <!-- <div class="elevator" v-for="elevator in elevators" :key="elevator">
-        {{ elevator }}
-      </div> -->
-    <!-- </div> -->
     <div class="buttons">
       <button
-        v-for="floor in numberOfFloors"
-        :key="floor"
-        @click="callButton(floor)"
+        v-for="floor in floors"
+        :key="floor.id"
+        @click="callButton(floor.id)"
       >
-        {{ floor }}
+        {{ floor.id }}
       </button>
     </div>
 </template>
@@ -18,7 +13,7 @@
 <script>
 export default {
   props: {
-    numberOfFloors: Number,
+    floors: Array,
     elevators: Array
   },
   methods: {
