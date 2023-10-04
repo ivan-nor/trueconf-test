@@ -27,11 +27,11 @@ export default {
   computed: {
     elevatorStyle () {
       const { currentFloor, prevFloor } = this.elevator
-      return ({ 'margin-bottom': `${10 + (this.elevator.currentFloor - 1) * 50}px`, transition: `margin-bottom ${Math.abs(currentFloor - prevFloor)}s ease` })
+      return ({ 'margin-bottom': `${10 + (currentFloor - 1) * 50}px`, transition: `margin-bottom ${Math.abs(currentFloor - prevFloor)}s ease-in-out` })
     }
   },
   updated () {
-    console.log('update ELEVATOR', this.elevator, this.elevator.currentFloor, this.elevatorStyle)
+    // console.log('update ELEVATOR', this.elevator.id, this.elevator.currentFloor)
   },
   methods: {
     // moveElevator (newFloor, oldFloor) { // ДОЛЖНА БЫТЬ АНИМАЦИЯ ЗДЕСЬ ?
