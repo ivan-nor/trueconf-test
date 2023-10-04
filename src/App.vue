@@ -2,7 +2,7 @@
   <div class="app">
     <input type="number" min="1" max="5" v-model="numberOfElevators"/>
     <p>Число лифтов: {{ numberOfElevators }}</p>
-    <input type="number" min="2" max="5" v-model="numberOfFloors" />
+    <input type="number" min="2" max="10" v-model="numberOfFloors" />
     <p>Число этажей: {{ numberOfFloors }}</p>
     <div class="shaft">
       <div v-for="elevator in elevators" :key="elevator.id">
@@ -23,7 +23,10 @@
 <script>
 import ElevatorComponent from './components/ElevatorComponent.vue'
 import CallButtons from './components/CallButtons.vue'
-// import _ from 'lodash'
+import _ from 'lodash'
+
+sessionStorage.setItem('numberOfElevators', 1)
+sessionStorage.setItem('numberOfFloors', 5)
 
 export default {
   name: 'App',
@@ -33,8 +36,8 @@ export default {
   },
   data () {
     return {
-      numberOfElevators: 1,
-      numberOfFloors: 5,
+      numberOfElevators: sessionStorage.getItem('numberOfElevators') || 1,
+      numberOfFloors: sessionStorage.getItem('numberOfFloors') || 5,
       elevators: [],
       floors: [],
       freeElevators: [],
@@ -50,7 +53,7 @@ export default {
     }
   },
   updated () {
-    // console.log('updated APP')
+    console.log('updated APP')
   },
   created () {
     this.setElevators()
@@ -60,35 +63,44 @@ export default {
   computed: {
   },
   methods: {
-    getNearestElevator (floor) { // floor: { id, currentElevator } ПРОДОЛЖИТЬ ЗДЕСЬ
-      // const elevator = _.find(this.elevators, (o) => o.id === floor.currentElevator)
-      console.log('ближайшее число к заданному', Math.abs(floor.id, this.elevators.map(e => e.currentFloor)))
-      const elevator = {}
-      console.log('get elevator:', floor.id, this.elevators, elevator)
-      return elevator
+    getNearestElevator (floor) {
+      const waitingElevators = this.elevators.filter(e => e.status === 'waiting') // свободные лифты
+      const mappedOnModules = waitingElevators.map(e => ({ ...e, diff: Math.abs(e.currentFloor - floor.id) })) // добавляем разницу с выбранным этажом
+      const nearestElevatorId = mappedOnModules.reduce((acc, elevator) => {
+        const minDiff = Math.min(...mappedOnModules.map(e => e.diff)) // минимальная разница
+        const minId = Math.min(...mappedOnModules.filter(e => e.diff === minDiff).map(e => e.id)) // минимальный ID среди лифтов с минимальной разницей
+        return (elevator.diff === minDiff && elevator.id === minId) ? elevator.id : acc
+      }, {})
+      console.log('ближайший лифт:', _.find(this.elevators, { id: nearestElevatorId }))
+      return _.find(this.elevators, { id: nearestElevatorId })
     },
 
     callButton (floor) { // отсюда идет задача в стек вызовов лифта
-      console.log('Вызван лифт на этаж:', floor, floor.id, floor.currentElevator) // floor: { id, currentElevator }
+      console.log('Вызван лифт на этаж:', floor, floor.id) // floor: { id, currentElevator }
       const nearestElevator = this.getNearestElevator(floor)
       console.log('Ближайший лифт: ', nearestElevator)
+      nearestElevator.prevFloor = nearestElevator.currentFloor
       nearestElevator.currentFloor = floor.id
     },
 
-    setElevators () {
-      console.log('set elevators', this.numberOfElevators)
+    callElevator (elevator, floor) {
+
+    },
+
+    setElevators () { // ДОБАВИТЬ ИЗМЕНЕНИЕ СЕССИОНСТОР
+      // console.log('set elevators', this.numberOfElevators)
       const newElevators = []
       for (let i = 1; i <= this.numberOfElevators; i += 1) {
-        newElevators.push({ id: i, currentFloor: 1 })
+        newElevators.push({ id: i, currentFloor: 1, status: 'waiting', prevFloor: null }) // waiting, moving, resting
       }
       this.elevators = newElevators
     },
 
-    setFloors () {
-      console.log('set floors', this.numberOfFloors)
+    setFloors () { // ДОБАВИТЬ ИЗМЕНЕНИЕ СЕССИОНСТОР
+      // console.log('set floors', this.numberOfFloors)
       const newFloors = []
       for (let i = 1; i <= this.numberOfFloors; i += 1) {
-        newFloors.push({ id: i, currentElevator: null })
+        newFloors.push({ id: i })
       }
       this.floors = newFloors
     }
