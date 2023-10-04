@@ -2,7 +2,7 @@
   <div class="app">
     <input type="number" min="1" max="5" v-model="numberOfElevators"/>
     <p>Число лифтов: {{ numberOfElevators }}</p>
-    <input type="number" min="1" max="5" v-model="numberOfFloors" />
+    <input type="number" min="2" max="5" v-model="numberOfFloors" />
     <p>Число этажей: {{ numberOfFloors }}</p>
     <div class="shaft">
       <div v-for="elevator in elevators" :key="elevator.id">
@@ -23,7 +23,7 @@
 <script>
 import ElevatorComponent from './components/ElevatorComponent.vue'
 import CallButtons from './components/CallButtons.vue'
-import _ from 'lodash'
+// import _ from 'lodash'
 
 export default {
   name: 'App',
@@ -36,7 +36,9 @@ export default {
       numberOfElevators: 1,
       numberOfFloors: 5,
       elevators: [],
-      floors: []
+      floors: [],
+      freeElevators: [],
+      queue: []
     }
   },
   watch: {
@@ -58,14 +60,19 @@ export default {
   computed: {
   },
   methods: {
-    getElevator (id) {
-      const elevator = _.find(this.elevators, (o) => o.id === id)
-      console.log('get elevator', id, elevator)
+    getNearestElevator (floor) { // floor: { id, currentElevator } ПРОДОЛЖИТЬ ЗДЕСЬ
+      // const elevator = _.find(this.elevators, (o) => o.id === floor.currentElevator)
+      console.log('ближайшее число к заданному', Math.abs(floor.id, this.elevators.map(e => e.currentFloor)))
+      const elevator = {}
+      console.log('get elevator:', floor.id, this.elevators, elevator)
       return elevator
     },
 
     callButton (floor) { // отсюда идет задача в стек вызовов лифта
-      console.log('Вызван лифт на этаж:', floor)
+      console.log('Вызван лифт на этаж:', floor, floor.id, floor.currentElevator) // floor: { id, currentElevator }
+      const nearestElevator = this.getNearestElevator(floor)
+      console.log('Ближайший лифт: ', nearestElevator)
+      nearestElevator.currentFloor = floor.id
     },
 
     setElevators () {
@@ -81,7 +88,7 @@ export default {
       console.log('set floors', this.numberOfFloors)
       const newFloors = []
       for (let i = 1; i <= this.numberOfFloors; i += 1) {
-        newFloors.push({ id: i })
+        newFloors.push({ id: i, currentElevator: null })
       }
       this.floors = newFloors
     }
@@ -101,6 +108,6 @@ export default {
 .shaft {
   display: flex;
   border: 1px solid #ccc; // Граница вокруг шахт
-  padding: 20px; // Отступ вокруг шахт
+  padding: 20px 10px 20px 20px; // Отступ вокруг шахт
 }
 </style>
