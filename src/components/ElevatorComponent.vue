@@ -13,33 +13,36 @@ export default {
   data () {
     return {
       elevatorStyle: {
-        bottom: 0
-      }
+        'margin-bottom': 10
+      },
+      currentFloor: 1
     }
   },
   watch: {
     currentFloor (newFloor, oldFloor) {
+      console.log('watch curr floor')
       this.moveElevator(newFloor, oldFloor)
     }
   },
   updated () {
-    console.log('elev upd')
+    console.log('elev upd', this.elevator, this.elevator.currentFloor, this.elevatorStyle)
+    this.elevatorStyle['margin-bottom'] = `${10 + (this.elevator.currentFloor - 1) * 50}px`
   },
   methods: {
-    moveElevator (newFloor, oldFloor) {
+    moveElevator (newFloor, oldFloor) { // ДОЛЖНА БЫТЬ АНИМАЦИЯ ЗДЕСЬ ?
       console.log('move elevator')
-      const floorHeight = 100
+      // const floorHeight = 100
 
-      const positionChange = (oldFloor - newFloor) * floorHeight
+      // const positionChange = (oldFloor - newFloor) * floorHeight
 
-      const elevatorElement = this.$ref.querySelector('.elevator')
-      elevatorElement.style.transition = 'bottom 1s ease'
-      elevatorElement.style.bottom = `${positionChange}px`
+      // const elevatorElement = this.$ref.querySelector('.elevator')
+      // elevatorElement.style.transition = 'bottom 1s ease'
+      // elevatorElement.style.bottom = `${positionChange}px`
 
-      setTimeout(() => {
-        elevatorElement.style.transition = 'none'
-        elevatorElement.style.bottom = '0px'
-      }, 500)
+      // setTimeout(() => {
+      //   elevatorElement.style.transition = 'none'
+      //   elevatorElement.style.bottom = '0px'
+      // }, 500)
     }
   }
 }
@@ -54,7 +57,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end; /* Чтобы лифт был внизу */
+  justify-content: flex-end; /* Чтобы лифт был внизу */;
 }
 
 .elevator {
@@ -62,8 +65,8 @@ export default {
   height: 30px;
   background-color: #3498db;
   border: none;
-  border-radius: 50%;
-  margin: 5px 0;
+  border-radius: 10%;
+  margin: 10px 0;
   text-align: center;
   line-height: 30px;
 }
