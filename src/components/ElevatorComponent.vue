@@ -1,6 +1,10 @@
 <template>
   <div class="elevator-shaft">
-    <div class="elevator" :style="elevatorStyle">{{ elevator.id }} {{ elevator.currentFloor }}</div>
+    <div
+      class="elevator"
+      :style="elevatorStyle"
+      :class="blinkingClass"
+    >{{ elevator.id }} {{ elevator.currentFloor }}</div>
   </div>
 </template>
 
@@ -12,22 +16,38 @@ export default {
   },
   data () {
     return {
-      // elevatorStyle: {
-      //   'margin-bottom': '10px'
-      // }
+      isBlinking: false
     }
   },
   watch: {
-    // elevatorStyle: function (prev, next) {
-    //   const prevValue = prev['margin-bottom'].match(/^\d+/)[0]
-    //   const nextValue = next['margin-bottom'].match(/^\d+/)[0]
-    //   console.log('WATCH', prev, next, Math.abs(prevValue - nextValue))
-    // }
+    elevatorStyle: function (prev, next) { // исправить задержку и добавить изменение состояния лифта
+      console.log('WATCH', prev, next)
+
+      const { currentFloor, prevFloor } = this.elevator
+      const time = Math.abs(currentFloor - prevFloor)
+      const delay = time + 3
+      console.log('ANIMATION time, delay', time, delay)
+
+      this.isBlinking = true
+      // this.elevator.status = 'resting'
+
+      setTimeout(() => {
+        this.isBlinking = false
+        // this.elevator.status = 'waiting'
+      }, delay * 1000)
+    }
   },
   computed: {
+    blinkingClass () {
+      return this.isBlinking ? 'blinking' : ''
+    },
     elevatorStyle () {
       const { currentFloor, prevFloor } = this.elevator
-      return ({ 'margin-bottom': `${10 + (currentFloor - 1) * 50}px`, transition: `margin-bottom ${Math.abs(currentFloor - prevFloor)}s ease-in-out` })
+      const time = Math.abs(currentFloor - prevFloor)
+      const transition = `margin-bottom ${time}s ease-in-out`
+      const styles = { 'margin-bottom': `${10 + (currentFloor - 1) * 50}px`, transition }
+      console.log('COMPUTED', styles)
+      return styles
     }
   },
   updated () {
@@ -74,5 +94,44 @@ export default {
   margin: 10px 0;
   text-align: center;
   line-height: 30px;
+}
+
+.blinking {
+  animation: blink 3s ease-in-out 2s infinite alternate forwards;
+}
+
+@keyframes blink {
+  0% {
+    background-color: #3498db;
+  }
+  25% {
+    background-color: #fff;
+  }
+  50% {
+    background-color: #0fa;
+  }
+  75% {
+    background-color: #fff;
+  }
+  100% {
+    background-color: #3498db;
+  }
+}
+
+@keyframes tempX {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    background-color:
+    #fff,
+    #fff,
+    #fff,
+    #0fa,
+    #0fa,
+    #0fa,
+    #0fa,
+    #0fa;
+  }
+  20%, 24%, 55% {
+      background-color: none;
+  }
 }
 </style>
