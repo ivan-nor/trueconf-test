@@ -25,9 +25,6 @@ import ElevatorComponent from './components/ElevatorComponent.vue'
 import CallButtons from './components/CallButtons.vue'
 import _ from 'lodash'
 
-sessionStorage.setItem('numberOfElevators', 1)
-sessionStorage.setItem('numberOfFloors', 5)
-
 export default {
   name: 'App',
   components: {
@@ -36,8 +33,8 @@ export default {
   },
   data () {
     return {
-      numberOfElevators: sessionStorage.getItem('numberOfElevators') || 1,
-      numberOfFloors: sessionStorage.getItem('numberOfFloors') || 5,
+      numberOfElevators: localStorage.getItem('numberOfElevators') ?? 1,
+      numberOfFloors: localStorage.getItem('numberOfFloors') ?? 5,
       elevators: [],
       floors: [],
       freeElevators: [],
@@ -58,7 +55,7 @@ export default {
   created () {
     this.setElevators()
     this.setFloors()
-    // console.log('created')
+    console.log('created', localStorage.getItem('numberOfElevators'), localStorage.getItem('numberOfFloors'))
   },
   computed: {
   },
@@ -88,7 +85,9 @@ export default {
     },
 
     setElevators () { // ДОБАВИТЬ ИЗМЕНЕНИЕ СЕССИОНСТОР
-      // console.log('set elevators', this.numberOfElevators)
+      localStorage.setItem('numberOfElevators', +this.numberOfElevators)
+      const count = localStorage.getItem('numberOfElevators')
+      console.log('set elevators', this.numberOfElevators, count)
       const newElevators = []
       for (let i = 1; i <= this.numberOfElevators; i += 1) {
         newElevators.push({ id: i, currentFloor: 1, status: 'waiting', prevFloor: null }) // waiting, moving, resting
@@ -97,11 +96,14 @@ export default {
     },
 
     setFloors () { // ДОБАВИТЬ ИЗМЕНЕНИЕ СЕССИОНСТОР
-      // console.log('set floors', this.numberOfFloors)
+      localStorage.setItem('numberOfFloors', +this.numberOfFloors)
+      const count = localStorage.getItem('numberOfFloors')
+      console.log('set floors', this.numberOfFloors, count)
       const newFloors = []
-      for (let i = 1; i <= this.numberOfFloors; i += 1) {
+      for (let i = 1; i <= count; i += 1) {
         newFloors.push({ id: i })
       }
+      localStorage.setItem('numberOfFloors', newFloors.length)
       this.floors = newFloors
     }
   }
