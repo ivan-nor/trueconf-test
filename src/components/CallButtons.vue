@@ -3,7 +3,7 @@
       <button
         v-for="floor in floors"
         :key="floor.id"
-        @click="callButton(floor.id)"
+        @click="callButton(floor)"
       >
         {{ floor.id }}
       </button>
@@ -30,24 +30,6 @@ export default {
   align-items: flex-end; /* Выравнивание по нижнему краю */
 }
 
-.shaft {
-  flex: 1; /* Растягиваем шахту на все доступное пространство */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.elevator {
-  width: 30px;
-  height: 30px;
-  background-color: #3498db;
-  border: none;
-  border-radius: 50%;
-  margin: 5px 0;
-  text-align: center;
-  line-height: 30px;
-}
-
 .buttons {
   display: flex;
   flex-direction: column-reverse; /* Отображение кнопок сверху вниз */
@@ -60,7 +42,7 @@ button {
   background-color: #e74c3c;
   border: none;
   border-radius: 50%;
-  margin: 5px 0;
+  margin: 10px 0px 10px 10px;
   cursor: pointer;
 }
 </style>
