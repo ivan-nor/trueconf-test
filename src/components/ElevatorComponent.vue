@@ -46,12 +46,12 @@ export default {
       const time = Math.abs(currentFloor - prevFloor)
       const transition = `margin-bottom ${time}s ease-in-out`
       const styles = { 'margin-bottom': `${10 + (currentFloor - 1) * 50}px`, transition }
-      console.log('COMPUTED', styles)
+      // console.log('COMPUTED', styles)
       return styles
     }
   },
   updated () {
-    // console.log('update ELEVATOR', this.elevator.id, this.elevator.currentFloor)
+    console.log('update ELEVATOR', this.elevator.id, this.elevator.currentFloor)
   },
   methods: {
     // moveElevator (newFloor, oldFloor) { // ДОЛЖНА БЫТЬ АНИМАЦИЯ ЗДЕСЬ ?
@@ -102,7 +102,7 @@ export default {
 
 @keyframes blink {
   0% {
-    background-color: #3498db;
+    background-color: #0fa;
   }
   25% {
     background-color: #fff;
