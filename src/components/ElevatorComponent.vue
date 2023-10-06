@@ -4,7 +4,10 @@
       class="elevator"
       :style="elevatorStyle"
       :class="blinkingClass"
-    >{{ elevator.id }} {{ elevator.currentFloor }}</div>
+      :direction="getDirection"
+    >
+      {{ getDirection }} {{ elevator.currentFloor }} {{ this.elevator.status }}
+    </div>
   </div>
 </template>
 
@@ -12,63 +15,34 @@
 export default {
   props: {
     elevator: Object,
-    floors: Object
+    floors: Object,
+    status: String
   },
   data () {
     return {
-      isBlinking: false
-    }
-  },
-  watch: {
-    elevatorStyle: function (prev, next) { // исправить задержку и добавить изменение состояния лифта
-      console.log('WATCH', prev, next)
-
-      const { currentFloor, prevFloor } = this.elevator
-      const time = Math.abs(currentFloor - prevFloor)
-      const delay = time + 3
-      console.log('ANIMATION time, delay', time, delay)
-
-      this.isBlinking = true
-      // this.elevator.status = 'resting'
-
-      setTimeout(() => {
-        this.isBlinking = false
-        // this.elevator.status = 'waiting'
-      }, delay * 1000)
+      isBlinking: this.elevator.status === 'resting',
+      direction: Math.sign(this.elevator.currentFloor - this.elevator.prevFloor),
+      isMoving: this.elevator.status === 'resting'
     }
   },
   computed: {
     blinkingClass () {
-      return this.isBlinking ? 'blinking' : ''
+      return this.status === 'resting' ? 'blinking' : ''
     },
     elevatorStyle () {
       const { currentFloor, prevFloor } = this.elevator
       const time = Math.abs(currentFloor - prevFloor)
       const transition = `margin-bottom ${time}s ease-in-out`
       const styles = { 'margin-bottom': `${10 + (currentFloor - 1) * 50}px`, transition }
-      // console.log('COMPUTED', styles)
+
       return styles
+    },
+    getDirection () {
+      if (this.status !== 'moving') return null
+      const direction = Math.sign(this.elevator.currentFloor - this.elevator.prevFloor)
+      if (direction === 0) return null
+      return (direction > 0) ? '↑' : '↓'
     }
-  },
-  updated () {
-    console.log('update ELEVATOR', this.elevator.id, this.elevator.currentFloor)
-  },
-  methods: {
-    // moveElevator (newFloor, oldFloor) { // ДОЛЖНА БЫТЬ АНИМАЦИЯ ЗДЕСЬ ?
-    //   console.log('move elevator', newFloor, oldFloor)
-    // const floorHeight = 100
-
-    // const positionChange = (oldFloor - newFloor) * floorHeight
-
-    // const elevatorElement = this.$ref.querySelector('.elevator')
-    // elevatorElement.style.transition = 'bottom 1s ease'
-    // elevatorElement.style.bottom = `${positionChange}px`
-
-    // setTimeout(() => {
-    //   elevatorElement.style.transition = 'none'
-    //   elevatorElement.style.bottom = '0px'
-    // }, 500)
-    // }
   }
 }
 </script>
@@ -97,7 +71,7 @@ export default {
 }
 
 .blinking {
-  animation: blink 3s ease-in-out 2s infinite alternate forwards;
+  animation: blink 3s ease-in-out 0s infinite alternate forwards;
 }
 
 @keyframes blink {

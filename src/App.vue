@@ -9,12 +9,14 @@
         <ElevatorComponent
           :floors="floors"
           :elevator="elevator"
+          :status="elevator.status"
         />
       </div>
         <CallButtons
           :floors="floors"
           :elevators="elevators"
           @callButton="callButton"
+          :queue="queue"
         />
     </div>
   </div>
@@ -38,7 +40,7 @@ export default {
       elevators: [],
       floors: [],
       freeElevators: [],
-      queue: []
+      queue: new Set()
     }
   },
   watch: {
@@ -47,21 +49,16 @@ export default {
     },
     numberOfFloors () {
       this.setFloors()
-    },
-    queue () {
-      console.log('APP watch QUEUE', this.queue)
-      this.callElevator(this.queue)
-    },
-    elevators () {
-      console.log('watch ELEV')
     }
   },
   methods: {
     watchCallsStack () {
-      console.log('WATCH CALLS STACK', this.queue)
-      // const nearestElevator = this.getNearestElevator()
-      // setTimeout(this.watchCallsStack, 1000) // ТАЙМЕР ОБНОВЛЕНИЯ
+      if (this.queue.size > 0) {
+        this.callElevator(this.queue)
+      }
+      setTimeout(this.watchCallsStack, 100) // ТАЙМЕР ОБНОВЛЕНИЯ
     },
+
     getNearestElevator (id) {
       const waitingElevators = this.elevators.filter(e => e.status === 'waiting') // свободные лифты
       const mappedOnModules = waitingElevators.map(e => ({ ...e, diff: Math.abs(e.currentFloor - id) })) // добавляем разницу с выбранным этажом
@@ -70,79 +67,70 @@ export default {
         const minId = Math.min(...mappedOnModules.filter(e => e.diff === minDiff).map(e => e.id)) // минимальный ID среди лифтов с минимальной разницей
         return (elevator.diff === minDiff && elevator.id === minId) ? elevator.id : acc
       }, {})
-      console.log('ближайший лифт:', _.find(this.elevators, { id: nearestElevatorId }))
       return _.find(this.elevators, { id: nearestElevatorId })
     },
 
     callButton (floor) { // отсюда идет задача в стек вызовов лифта
       const findElevatorsOnFloor = this.elevators.filter((e) => e.currentFloor === floor.id) // лифты на этаже
-      console.log('лифты на этаже', typeof floor.id, floor.id, findElevatorsOnFloor)
       if (findElevatorsOnFloor.length === 0) {
-        this.queue = [...this.queue, Number(floor.id)]
+        this.queue.add(Number(floor.id))
       }
-
-      // console.log('Вызван лифт на этаж:', floor, floor.id) // floor: { id, currentElevator }
-      // const nearestElevator = this.getNearestElevator(floor)
-      // console.log('Ближайший лифт: ', nearestElevator)
-      // nearestElevator.prevFloor = nearestElevator.currentFloor
-      // nearestElevator.currentFloor = floor.id
-      // nearestElevator.status = 'moving'
-      // const time = Math.abs(nearestElevator.prevFloor - nearestElevator.currentFloor) + 3
-      // // console.log('Вызван лифт на этаж:', floor, floor.id, 'Ближайший лифт: ', nearestElevator)
-      // console.log('before', nearestElevator.prevFloor, nearestElevator.currentFloor, time, nearestElevator.status)
-      // setTimeout(() => {
-      //   nearestElevator.status = 'waiting'
-      //   console.log('after', nearestElevator.status)
-      // }, time * 1000)
+      this.watchCallsStack()
     },
 
-    callElevator (id) {
-      console.log('CALL ELEVATOR QUEUE', this.queue, id)
-      console.log('Вызван лифт на этаж:', id, this.queue[0]) // floor: { id, currentElevator }
-      const nearestElevator = this.getNearestElevator(id)
-      console.log('Ближайший лифт: ', nearestElevator)
-      nearestElevator.prevFloor = nearestElevator.currentFloor
-      nearestElevator.currentFloor = this.queue[0]
-      nearestElevator.status = 'moving'
-      const time = Math.abs(nearestElevator.prevFloor - nearestElevator.currentFloor) + 3
-      // console.log('Вызван лифт на этаж:', floor, floor.id, 'Ближайший лифт: ', nearestElevator)
-      console.log('before', nearestElevator.prevFloor, nearestElevator.currentFloor, time, nearestElevator.status)
-      setTimeout(() => {
-        nearestElevator.status = 'waiting'
-        console.log('after', nearestElevator.status)
-      }, time * 1000)
+    callElevator () {
+      this.queue.forEach((callingFloorId) => {
+        const nearestElevator = this.getNearestElevator(callingFloorId)
+        const queueElevator = this.elevators.filter(e => e.currentFloor === callingFloorId)
+
+        if (!nearestElevator || queueElevator.length > 0) {
+          return
+        }
+
+        nearestElevator.status = 'moving'
+        nearestElevator.prevFloor = nearestElevator.currentFloor
+        nearestElevator.currentFloor = callingFloorId
+        const prevFloorOfNearestElevator = this.floors.filter(({ id }) => id === nearestElevator.prevFloor)[0]
+        const currentFloorOfNearestElevator = this.floors.filter(({ id }) => id === nearestElevator.currentFloor)[0]
+        prevFloorOfNearestElevator.elevatorsOnFloor = prevFloorOfNearestElevator.elevatorsOnFloor.filter(elevatorId => elevatorId !== nearestElevator.id)
+        currentFloorOfNearestElevator.elevatorsOnFloor.push(nearestElevator.id)
+        const time = Math.abs(nearestElevator.currentFloor - nearestElevator.prevFloor)
+
+        setTimeout(() => {
+          this.queue.delete(callingFloorId)
+          nearestElevator.status = 'resting'
+
+          setTimeout(() => {
+            nearestElevator.status = 'waiting'
+          }, 3000)
+        }, time * 1000)
+      })
     },
 
-    setElevators () { // ДОБАВИТЬ ИЗМЕНЕНИЕ СЕССИОНСТОР
+    setElevators () {
       localStorage.setItem('numberOfElevators', +this.numberOfElevators)
       const count = localStorage.getItem('numberOfElevators')
-      console.log('set elevators', this.numberOfElevators, count)
       const newElevators = []
-      for (let i = 1; i <= this.numberOfElevators; i += 1) {
-        newElevators.push({ id: i, currentFloor: 1, status: 'waiting', prevFloor: null }) // waiting, moving, resting
+      for (let i = 1; i <= count; i += 1) {
+        newElevators.push({ id: i, currentFloor: 1, status: 'waiting', prevFloor: 1 }) // waiting, moving, resting
       }
       this.elevators = newElevators
     },
 
-    setFloors () { // ДОБАВИТЬ ИЗМЕНЕНИЕ СЕССИОНСТОР
+    setFloors () {
       localStorage.setItem('numberOfFloors', +this.numberOfFloors)
       const count = localStorage.getItem('numberOfFloors')
-      console.log('set floors', this.numberOfFloors, count)
       const newFloors = []
       for (let i = 1; i <= count; i += 1) {
-        newFloors.push({ id: i })
+        newFloors.push({ id: i, elevatorsOnFloor: this.elevators.map(e => e.currentFloor).filter(c => c === i) })
       }
       localStorage.setItem('numberOfFloors', newFloors.length)
       this.floors = newFloors
     }
   },
-  updated () {
-    console.log('updated APP')
-  },
   created () {
     this.setElevators()
     this.setFloors()
-    console.log('created', localStorage.getItem('numberOfElevators'), localStorage.getItem('numberOfFloors'))
   }
 }
 </script>

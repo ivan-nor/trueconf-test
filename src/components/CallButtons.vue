@@ -1,20 +1,29 @@
 <template>
     <div class="buttons">
-      <button
+      <ButtonComponent
         v-for="floor in floors"
         :key="floor.id"
-        @click="callButton(floor)"
-      >
-        {{ floor.id }}
-      </button>
+        @callButton="callButton"
+        :floor="floor"
+        :elevators="elevators"
+        :elevatorsOnFloor="floor.elevatorsOnFloor"
+        :queue="queue"
+        :status="getStatus"
+      />
     </div>
 </template>
 
 <script>
+import ButtonComponent from './ButtonComponent.vue'
+
 export default {
+  components: {
+    ButtonComponent
+  },
   props: {
     floors: Array,
-    elevators: Array
+    elevators: Array,
+    queue: Set
   },
   methods: {
     callButton (floor) {
@@ -34,15 +43,5 @@ export default {
   display: flex;
   flex-direction: column-reverse; /* Отображение кнопок сверху вниз */
   align-items: center; /* Выравнивание по центру по горизонтали */
-}
-
-button {
-  width: 30px;
-  height: 30px;
-  background-color: #e74c3c;
-  border: none;
-  border-radius: 50%;
-  margin: 10px 0px 10px 10px;
-  cursor: pointer;
 }
 </style>
