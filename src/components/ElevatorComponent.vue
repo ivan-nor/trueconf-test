@@ -6,7 +6,7 @@
       :class="blinkingClass"
       :direction="getDirection"
     >
-      {{ getDirection }} {{ elevator.currentFloor }} {{ this.elevator.status }}
+      {{ getDirection }} {{ elevator.currentFloor }}
     </div>
   </div>
 </template>
