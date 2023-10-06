@@ -5,10 +5,7 @@
         :key="floor.id"
         @callButton="callButton"
         :floor="floor"
-        :elevators="elevators"
-        :elevatorsOnFloor="floor.elevatorsOnFloor"
         :queue="queue"
-        :status="getStatus"
       />
     </div>
 </template>

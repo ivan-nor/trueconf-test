@@ -4,9 +4,8 @@
       class="elevator"
       :style="elevatorStyle"
       :class="blinkingClass"
-      :direction="getDirection"
     >
-      {{ getDirection }} {{ elevator.currentFloor }} {{ this.elevator.status }}
+      {{ getDirectionSymbol }} {{ elevator.currentFloor }}
     </div>
   </div>
 </template>
@@ -18,13 +17,6 @@ export default {
     floors: Object,
     status: String
   },
-  data () {
-    return {
-      isBlinking: this.elevator.status === 'resting',
-      direction: Math.sign(this.elevator.currentFloor - this.elevator.prevFloor),
-      isMoving: this.elevator.status === 'resting'
-    }
-  },
   computed: {
     blinkingClass () {
       return this.status === 'resting' ? 'blinking' : ''
@@ -32,14 +24,17 @@ export default {
     elevatorStyle () {
       const { currentFloor, prevFloor } = this.elevator
       const time = Math.abs(currentFloor - prevFloor)
-      const transition = `margin-bottom ${time}s ease-in-out`
-      const styles = { 'margin-bottom': `${10 + (currentFloor - 1) * 50}px`, transition }
 
-      return styles
+      const marginBottom = `${10 + (currentFloor - 1) * 50}px`
+      const transition = `margin-bottom ${time}s ease-in-out`
+
+      return { marginBottom, transition }
     },
-    getDirection () {
+    getDirectionSymbol () {
+      const { currentFloor, prevFloor } = this.elevator
       if (this.status !== 'moving') return null
-      const direction = Math.sign(this.elevator.currentFloor - this.elevator.prevFloor)
+
+      const direction = Math.sign(currentFloor - prevFloor)
       if (direction === 0) return null
       return (direction > 0) ? '↑' : '↓'
     }
@@ -89,23 +84,6 @@ export default {
   }
   100% {
     background-color: #3498db;
-  }
-}
-
-@keyframes tempX {
-  0%, 18%, 22%, 25%, 53%, 57%, 100% {
-    background-color:
-    #fff,
-    #fff,
-    #fff,
-    #0fa,
-    #0fa,
-    #0fa,
-    #0fa,
-    #0fa;
-  }
-  20%, 24%, 55% {
-      background-color: none;
   }
 }
 </style>

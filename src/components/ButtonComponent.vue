@@ -1,6 +1,5 @@
 <template>
       <button
-        :key="floor.id"
         @click="callButton(floor)"
         :style="getBackgroung"
       >
@@ -14,10 +13,7 @@
 export default {
   props: {
     floor: Object,
-    elevators: Array,
-    queue: Set,
-    status: Boolean,
-    elevatorsOnFloor: Array
+    queue: Set
   },
   methods: {
     callButton (floor) {
@@ -27,8 +23,7 @@ export default {
   computed: {
     getBackgroung () {
       const color = this.queue.has(this.floor.id) ? 'yellow' : 'green'
-      const style = { 'background-color': color }
-      return style
+      return { 'background-color': color }
     }
   }
 }

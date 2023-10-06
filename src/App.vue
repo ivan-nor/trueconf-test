@@ -39,7 +39,6 @@ export default {
       numberOfFloors: localStorage.getItem('numberOfFloors') ?? 5,
       elevators: [],
       floors: [],
-      freeElevators: [],
       queue: new Set()
     }
   },
@@ -59,14 +58,15 @@ export default {
       setTimeout(this.watchCallsStack, 100) // ТАЙМЕР ОБНОВЛЕНИЯ
     },
 
-    getNearestElevator (id) {
+    getNearestElevator (floorId) {
       const waitingElevators = this.elevators.filter(e => e.status === 'waiting') // свободные лифты
-      const mappedOnModules = waitingElevators.map(e => ({ ...e, diff: Math.abs(e.currentFloor - id) })) // добавляем разницу с выбранным этажом
+      const mappedOnModules = waitingElevators.map(e => ({ ...e, diff: Math.abs(e.currentFloor - floorId) })) // добавляем разницу с выбранным этажом
+      const minDiff = Math.min(...mappedOnModules.map(e => e.diff)) // минимальная разница
+      const minId = Math.min(...mappedOnModules.filter(e => e.diff === minDiff).map(e => e.id)) // минимальный ID среди лифтов с минимальной разницей
       const nearestElevatorId = mappedOnModules.reduce((acc, elevator) => {
-        const minDiff = Math.min(...mappedOnModules.map(e => e.diff)) // минимальная разница
-        const minId = Math.min(...mappedOnModules.filter(e => e.diff === minDiff).map(e => e.id)) // минимальный ID среди лифтов с минимальной разницей
         return (elevator.diff === minDiff && elevator.id === minId) ? elevator.id : acc
       }, {})
+
       return _.find(this.elevators, { id: nearestElevatorId })
     },
 
@@ -81,19 +81,22 @@ export default {
     callElevator () {
       this.queue.forEach((callingFloorId) => {
         const nearestElevator = this.getNearestElevator(callingFloorId)
-        const queueElevator = this.elevators.filter(e => e.currentFloor === callingFloorId)
+        const currentElevators = this.elevators.filter(e => e.currentFloor === callingFloorId)
+        console.log()
 
-        if (!nearestElevator || queueElevator.length > 0) {
+        if (!nearestElevator || currentElevators.length > 0) {
           return
         }
 
         nearestElevator.status = 'moving'
         nearestElevator.prevFloor = nearestElevator.currentFloor
         nearestElevator.currentFloor = callingFloorId
+
         const prevFloorOfNearestElevator = this.floors.filter(({ id }) => id === nearestElevator.prevFloor)[0]
         const currentFloorOfNearestElevator = this.floors.filter(({ id }) => id === nearestElevator.currentFloor)[0]
         prevFloorOfNearestElevator.elevatorsOnFloor = prevFloorOfNearestElevator.elevatorsOnFloor.filter(elevatorId => elevatorId !== nearestElevator.id)
         currentFloorOfNearestElevator.elevatorsOnFloor.push(nearestElevator.id)
+
         const time = Math.abs(nearestElevator.currentFloor - nearestElevator.prevFloor)
 
         setTimeout(() => {
