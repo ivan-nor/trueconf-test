@@ -39,7 +39,8 @@ export default {
       numberOfFloors: localStorage.getItem('numberOfFloors') ?? 5,
       elevators: [],
       floors: [],
-      queue: new Set()
+      queue: new Set(),
+      count: 0
     }
   },
   watch: {
@@ -55,7 +56,7 @@ export default {
       if (this.queue.size > 0) {
         this.callElevator(this.queue)
       }
-      setTimeout(this.watchCallsStack, 100) // ТАЙМЕР ОБНОВЛЕНИЯ
+      // setTimeout(this.watchCallsStack, 100) // ТАЙМЕР ОБНОВЛЕНИЯ
     },
 
     getNearestElevator (floorId) {
@@ -79,6 +80,7 @@ export default {
     },
 
     callElevator () {
+      console.log('CALL ELeVATOR', ++this.count, this.queue) // TODO: исправить вложенный таймаут
       this.queue.forEach((callingFloorId) => {
         const nearestElevator = this.getNearestElevator(callingFloorId)
         const currentElevators = this.elevators.filter(e => e.currentFloor === callingFloorId)
